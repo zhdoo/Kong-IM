@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>垃圾聊天室</title>
+</head>
+<body>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<h1>垃圾聊天室</h1>
+<script src="/socket.io/socket.io.js"></script>
+<div class="msglist" style="display: none;">
+    消息列表<ul class="msglistItem">
+</ul>
+    用户列表:<ul class="memberList">
+</ul>
+    <input type="text"  name='msg' value="" ><button class="sendMsg">发送</button>
+</div>
+<div class="setUserInfo" style="display: none;" >
+    <input type="text"  name='name' value="" placeholder="昵称" ><br>
+    <input type="text"  name='age' value="" placeholder="年龄" ><br>
+    <select name="sex" id="" >
+        <option value="">请设置性别</option>
+        <option value="男">男</option>
+        <option value="女">女</option>
+    </select><br>
+    <button>设置</button>
+</div>
+
+<script>
+    var socket = io.connect('ws://127.0.0.1:13001');
+    $(function(){
+        var memberList=null;
+        var userConfig=null;
+        if(userConfig){
+            socket.emit('get member', 1); //向服务器发送消息
+            socket.emit('new user', userConfig); //向服务器发送消息
+            $('.msglist').show();
+            $('.setUserInfo').hide()
+
+        }else{
+            $('.msglist').hide();
+            $('.setUserInfo').show()
+        }
+
+
+
+    })
+    $('.setUserInfo>button').click(function(){
+        var userConfigTmp={
+            name:$("input[name=name]").val(),
+            age:$("input[name=age]").val(),
+            sex:$("select[name=sex]").val(),
+        }
+        socket.emit('new user', userConfigTmp); //向服务器发送消息
+        socket.on('login',function(data){
+            userConfig=data;
+            $(".msglistItem").append('<li>'+data.name+'上线了大家欢迎一下！</li>')
+            $('.msglist').show();
+            $('.setUserInfo').hide();
+        });
+    })
+    $(".sendMsg").click(function(){
+        var touserid,user;
+        var msg=$("input[name=msg]").val();
+        $('.memberList>li').each(function(){
+            if($(this).hasClass('select')){   touserid=$(this).data('userid')
+                user=$(this).data('name')
+            }
+        })
+
+        console.log(user)
+
+        if(touserid){
+            $(".msglistItem").append('<li style="color:red">你对'+user+'说：'+msg+'</li>')
+        }
+        socket.emit('msg', {rp:msg,fromname:userConfig.name,toUserId:touserid,toname:user}); //向服务器发送消息
+    })
+
+
+    socket.on('member list',function(data){
+        console.log(data)
+        var html='';
+        for(var i in data){
+            html+='<li  data-userid='+data[i].userId+'  data-name='+data[i].name+'>'+data[i].name+'--'+data[i].userId+'</li>';
+        }
+        $(".memberList").html(html)
+    });
+    socket.on('msg',function(data){
+        $(".msglistItem").append('<li>'+data.name+'说：'+data.rp+'</li>')
+    });
+    socket.on('private msg',function(data){
+        $(".msglistItem").append('<li style="color:red">'+data.fromname+'对你说：'+data.rp+'</li>')
+    });
+
+    $(document).on('click', '.memberList>li', function () {    //
+        $(this).addClass('select').siblings().removeClass('select');
+        console.log($(this).data('userid'))
+
+    });
+
+</script>
+</body>
+<style>
+    .select{
+        background: #ccc;
+    }
+
+</style>
+</html>
