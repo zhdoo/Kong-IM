@@ -4,11 +4,17 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import VueSocketio from 'vue-socket.io'
 import MuseUI from 'muse-ui'
 import 'muse-ui/dist/muse-ui.css'
 Vue.use(MuseUI)
-Vue.config.productionTip = false
+import leftset from './public/leftset/leftset'
+
+import VueResource from 'vue-resource';
+Vue.use(VueResource)
+
+Vue.use(leftset)
+
+Vue.config.productionTip = true
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

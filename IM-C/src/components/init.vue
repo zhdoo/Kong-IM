@@ -1,76 +1,54 @@
 <template>
   <div>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <mu-appbar title="秋名山老司机" class="topBar" >
+    <mu-appbar title="飙车党 V1.1.0" class="topIndexBar" >
       <mu-icon-button icon="menu" slot="left" @click="toggle(true)"/>
       <mu-flat-button label="找缘分" slot="right"/>
     </mu-appbar>
-    <mu-drawer :open="open" :docked="docked" @close="toggle()">
+    <mu-drawer :open="openSettings" :docked="docked" @close="toggle()">
       <mu-list @itemClick="docked ? '' : toggle()">
-        <mu-list>
-          <mu-list-item disabled title="设置111" />
-        </mu-list>
-        <mu-divider />
-        <mu-list>
-          <mu-sub-header>基础设置</mu-sub-header>
-          <mu-list-item disableRipple  @click="handleToggle('events')" title="展示位置">
-            <mu-switch v-model="events"  slot="right"/>
-          </mu-list-item>
-          <mu-list-item disableRipple  title="音效">
-            <mu-switch v-model="calls" slot="right"/>
-          </mu-list-item>
-          <mu-list-item disableRipple  title="个性标签" >
-            <mu-select-field v-model="game1"  class="selectTag"  multiple label="最多选择三个">
-              <mu-menu-item value="1" title="阴阳师"/>
-              <mu-menu-item value="2" title="影之刃"/>
-              <mu-menu-item value="3" title="天下HD"/>
-              <mu-menu-item value="4" title="穿越火线"/>
-              <mu-menu-item value="5" title="英雄联盟"/>
-              <mu-menu-item value="6" title="王者荣耀"/>
-            </mu-select-field>
-          </mu-list-item>
-          <mu-list-item disableRipple  title="不雅词过滤" >
-            <mu-select-field v-model="game2" class="selectTag" label="过滤时间">
-              <mu-menu-item value="1" title="不过滤"/>
-              <mu-menu-item value="2" title="过滤30秒"/>
-              <mu-menu-item value="3" title="过滤3分钟"/>
-              <mu-menu-item value="4" title="一直过滤"/>
-            </mu-select-field>
-          </mu-list-item>
-        </mu-list>
-        <mu-list>
-          <mu-sub-header>普通VIP功能</mu-sub-header>
-          <mu-list-item disableRipple  title="筛选年龄" >
-            <mu-select-field v-model="game3" class="selectTag"  label="匹配年龄段">
-              <mu-menu-item value="" title="请选择"/>
-              <mu-menu-item value="1" title="18岁以下"/>
-              <mu-menu-item value="2" title="18～23岁"/>
-              <mu-menu-item value="3" title="23岁以上"/>
-            </mu-select-field>
-          </mu-list-item>
-        </mu-list>
-        <mu-list>
-          <mu-sub-header>SVIP功能</mu-sub-header>
-          <mu-list-item disableRipple  title="筛选地区" >
-            <mu-select-field v-model="game4" class="selectTag"  label="匹配时间约1～2分钟">
-              <mu-menu-item value="" title="请选择"/>
-              <mu-menu-item value="1" title="18岁以下"/>
-              <mu-menu-item value="2" title="18～23岁"/>
-              <mu-menu-item value="3" title="23岁以上"/>
-            </mu-select-field>
-          </mu-list-item>
-        </mu-list>
-        <mu-list>
-          <mu-menu-item title="购买VIP／SVIP"/>
-          <mu-menu-item title="输入VIP码"/>
-          <mu-menu-item title="异常修复"/>
-          <mu-menu-item title="寻人区"/>
-          <mu-menu-item title="获取我的ID"/>
-        </mu-list>
+      <leftset />
       </mu-list>
     </mu-drawer>
-    <mu-content-block class="msgContent" >
+    <mu-content-block class="content">
+      <div class="contentTitle">
+        散落在指尖的阳光，我试着轻轻抓住光影的踪迹，它却在眉宇间投下一片淡淡的阴影。</div>
+      <div class="checkSex">
+        <div class="demo-paper" v-on:click="checksex(1)"   :class="isSexActive==1?'sexactive':''" >帅哥</div>
+        <div class="demo-paper" v-on:click="checksex(2)"   :class="isSexActive==2?'sexactive':''" >美女</div>
+      </div>
+      <div>
+        <mu-raised-button class="demo-raised-button"  @click='startChat()'  label="开始聊天" labelPosition="after" icon="chat" secondary/>
+      </div>
+      <div>
+        <mu-flat-button label="输入vip码"  @click='setvipcode()'   class="demo-flat-button" />
+      </div>
     </mu-content-block>
+    <mu-popup position="bottom" popupClass="showAgeMod" :open="showAgeMod" >
+      <mu-appbar title="选择年龄">
+      </mu-appbar>
+      <mu-content-block>
+        <mu-list>
+          <mu-list-item titleClass='ageTitleClass' @click='checkAge(1)' title="18岁以下">
+          </mu-list-item>
+          <mu-list-item titleClass='ageTitleClass' @click='checkAge(2)' title="18-23岁">
+          </mu-list-item>
+          <mu-list-item titleClass='ageTitleClass' @click='checkAge(3)' title="23-28岁">
+          </mu-list-item>
+          <mu-list-item titleClass='ageTitleClass' @click='checkAge(4)' title="28以上">
+          </mu-list-item>
+        </mu-list>
+      </mu-content-block>
+    </mu-popup>
+    <mu-dialog :open="showDialog" title="错误">
+      {{ showMsg }}
+      <mu-flat-button label="确定" slot="actions" primary @click="closeDialog"/>
+    </mu-dialog>
+    <mu-dialog :open="vipdialog" title="输入VIP码"  @close="closevipmod" >
+      <mu-text-field hintText="提示文字" fullWidth name="vipcode" v-model="vipcode" />
+      <mu-flat-button slot="actions" @click="closevipmod" primary label="取消"/>
+      <mu-flat-button slot="actions" primary @click="sendvipcode" label="确定"/>
+    </mu-dialog>
   </div>
 </template>
 
@@ -78,40 +56,92 @@
 export default {
   data: function () {
     return {
-      open: false,
-      docked: true,
-      leftBtnText: '重新开始',
-      events: true,
-      calls: true,
-      messages: false,
-      notifications: false,
-      sounds: false,
-      videoSounds: false,
-      game1: '',
-      game2: '',
-      game3: '',
-      game4: ''
+      userInfo: {
+        age: null,
+        sex: null
+      },
+      vipdialog: false,
+      vipcode:null,
+      showMsg: '请先选择性别！',
+      isSexActive: 0,
+      showAge: false,
+      showAgeMod: false,
+      openSettings: false,
+      docked: false,
+      showDialog: false
     }
   },
   mounted: function (val) {
-
+    const that = this
   },
   methods: {
     toggle (flag) {
-      this.open = !this.open
+      this.openSettings = !this.openSettings
       this.docked = !flag
     },
     handleToggle (key) {
       this[key] = !this[key]
+    },
+    checksex (idx) {
+      this.isSexActive = idx
+      this.userInfo.sex = idx
+      this.showAgeMod = true
+    },
+    checkAge (item) {
+      this.showAgeMod = false
+      this.userInfo.age = item
+      // this.$router.push({"path":'/chat'})
+    },
+    closeDialog () {
+      this.showDialog = false
+    },
+    startChat () {
+      if (this.userInfo.sex == null) {
+        this.showDialog = true
+        this.showMsg = '请选择性别！'
+      } else {
+        console.log(this.userInfo)
+        //          /this.$router.push({'path':'/chat'})
+      }
+    },
+    setvipcode () {
+      this.vipdialog = true
+    },
+    sendvipcode () {
+      var that=this
+      fetch('http://im.am1024.com/api/member/validatevipcode?text=' + this.vipcode).then(function (response) {
+        return response.json()
+      }).then(function (data) {
+        if (data.status == 1) {
+          localStorage.setItem( "vipcode" , that.vipcode);
+          that.vipdialog=false
+        }else{
+          that.showDialog=true
+          that.showMsg=data.msg
+        }
+      }).catch(function (e) {
+
+        console.log('Oops, error')
+      })
+    },
+    closevipmod () {
+      this.vipdialog = false
     }
   }
 }
 </script>
 
 <style>
-  .topBar{
+  .topIndexBar{
     position: fixed;
     top: 0;
+    background-color: transparent;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    color: #fff;
+  }
+  .sexactive{
+    background: #000!important
   }
   .bottomBar{
     position: fixed;
@@ -131,6 +161,9 @@ export default {
   }
   .buttomInput>.mu-text-field-content{
     padding: 0;
+  }
+  .mu-appbar-title{
+    text-align: center;
   }
   .input{
     width: 100%;
@@ -159,8 +192,55 @@ export default {
   .selectTag>.mu-text-field-content{
     padding-bottom: 0!important;
   }
-  .msgContent{
-    margin-bottom: 50px;
-    margin-top: 60px;
+  .content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: url("../assets/bg.jpg") no-repeat center center #000;
+    background-size: auto auto;
+  }
+  .content>div{
+    margin: 20px;
+  }
+  .contentTitle{
+    font-size: 20px;
+    color: #fff;
+    max-width: 300px;
+  }
+  .checkSex{
+    display: flex;
+    flex-direction: row;
+    font-size: 20px;
+    color: #fff;
+  }
+  .demo-paper {
+    display: inline-block;
+    height: 80px;
+    width: 80px;
+    margin: 20px;
+    line-height: 80px ;
+    text-align: center;
+    background: #7e57c2;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+  }
+  .demo-raised-button{
+    font-size: 20px;
+  }
+  .demo-flat-button span{
+    font-size: 20px;
+    color: #fff;
+  }
+  .ageTitleClass{
+    text-align: center;
+  }
+  .showAgeMod{
+    width: 100%;
+  }
+  html,body,#app,#app>div{
+    height: 100%;
   }
 </style>
