@@ -7,7 +7,7 @@
     </mu-appbar>
     <mu-drawer :open="openSettings" :docked="docked" @close="toggle()">
       <mu-list @itemClick="docked ? '' : toggle()">
-      <leftset />
+      <leftset :viptype="viptype" />
       </mu-list>
     </mu-drawer>
     <mu-content-block class="content">
@@ -68,7 +68,8 @@ export default {
       showAgeMod: false,
       openSettings: false,
       docked: false,
-      showDialog: false
+      showDialog: false,
+      viptype:localStorage.getItem( "viptype")?localStorage.getItem( "viptype"):'normal'
     }
   },
   mounted: function (val) {
@@ -86,10 +87,12 @@ export default {
       this.isSexActive = idx
       this.userInfo.sex = idx
       this.showAgeMod = true
+      localStorage.setItem( "userSex" ,idx);
     },
     checkAge (item) {
       this.showAgeMod = false
       this.userInfo.age = item
+      localStorage.setItem( "userAge" ,item);
       // this.$router.push({"path":'/chat'})
     },
     closeDialog () {
@@ -114,6 +117,8 @@ export default {
       }).then(function (data) {
         if (data.status == 1) {
           localStorage.setItem( "vipcode" , that.vipcode);
+          localStorage.setItem( "viptype" , data.viptype);
+          that.viptype=data.viptype
           that.vipdialog=false
         }else{
           that.showDialog=true
